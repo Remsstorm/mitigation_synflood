@@ -1,0 +1,36 @@
+######SYNFLOOD PROTECTION
+- name: mitigation ddos
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: syncookies
+      shell: echo "net.ipv4.tcp_syncookies = 1"
+    - name: filter
+      shell: echo "net.ipv4.conf.all.rp_filter = 1"
+    - name: synbacklog
+      shell: echo "net.ipv4.tcp_max_syn_backlog = 1024"
+    - name: syncookies
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: net.ipv4.tcp_syncookies = 1
+              net.ipv4.conf.all.rp_filter = 1
+              net.ipv4.tcp_max_syn_backlog = 1024
+    - name: verfify error
+      shell: echo $?  
+      register: result
+    - debug:
+        msg: "{{result.stdout}}"
+
+    
+- name: playbook
+  hosts: all
+  become: yes
+  become_user: root
+  tasks:
+    - name: sysctl
+      shell: sysctl -p /etc/sysctl.conf
+      register: result
+    - debug:
+        msg: "'*************syncookie+synbacklog+rpfilter+saveconf**************'"
+      
